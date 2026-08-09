@@ -32,8 +32,6 @@ class URReachPolicy(PolicyControllerSKRL):
         self.has_joint_data = False
         self.current_joint_positions = np.zeros(6)
         self.current_joint_velocities = np.zeros(6)
-        self.gripper_controller = GripperController(ip="192.168.1.101", port=63352)
-        self._last_gripper_command = None
 
     def update_joint_state(self, position, velocity) -> None:
         """
@@ -55,8 +53,7 @@ class URReachPolicy(PolicyControllerSKRL):
         obs[0:6] = self.current_joint_positions - self.default_pos
         obs[6:12] = self.current_joint_velocities
         obs[12:19] = command  # 3 pos + 4 quat
-        obs[19:31] = self._previous_action  # teljes 12-dim action
-        # 31-43 közé kerülhet padding vagy egyéb input (ha kell)
+        obs[19:31] = self._previous_action
         return obs
 
     def forward(self, dt: float, command: np.ndarray) -> np.ndarray:
@@ -80,24 +77,6 @@ class URReachPolicy(PolicyControllerSKRL):
             self.action = self._compute_action(obs)
             self._previous_action = self.action.copy()
 
-            # === Gripper control ===
-            gripper_action_value = self.action[-1]  # utolsó érték: gripper open/close
-            gripper_threshold = 0.5
-
-            if gripper_action_value > gripper_threshold:
-                desired_gripper_state = "close"
-            else:
-                desired_gripper_state = "open"
-
-            if desired_gripper_state != self._last_gripper_command:
-                if desired_gripper_state == "close":
-                    self.gripper_controller.close()
-                else:
-                    self.gripper_controller.open()
-                self._last_gripper_command = desired_gripper_state
-            # === Gripper control END ===
-
-        # Védelem: ha még nincs action definiálva, addig ne küldjünk semmit
         if not hasattr(self, "action"):
             return None
             # Debug Logging (commented out)
