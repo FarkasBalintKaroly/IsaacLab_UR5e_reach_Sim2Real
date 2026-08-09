@@ -1,6 +1,3 @@
-
-
-Readme · MD
 # IsaacLab_UR5e_reach_Sim2Real
  
 Deploying an [Isaac Lab](https://isaac-sim.github.io/IsaacLab/)-trained **PPO reach policy** for the **Universal Robots UR5e** onto a real (or driver-controlled simulated) robot through **ROS 2**.
