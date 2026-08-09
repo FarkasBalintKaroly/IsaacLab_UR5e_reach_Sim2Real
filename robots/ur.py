@@ -1,6 +1,5 @@
 import numpy as np
 from controllers.policy_controller import PolicyController, PolicyControllerSKRL
-from controllers.gripper_controller import GripperController
 
 
 class URReachPolicy(PolicyControllerSKRL):
